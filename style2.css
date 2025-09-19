@@ -1,0 +1,27 @@
+body { padding-top: 70px; }
+    header {
+      background: linear-gradient(to right, #d50000, #b71c1c);
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    header a {
+      color: #fff;
+      text-decoration: underline;
+    }
+    section img {
+      max-width: 100%;
+      border-radius: .75rem;
+      margin-top: 1rem;
+    }
+    footer {
+      background: #212529;
+      color: white;
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    footer a {
+      color: #f8f9fa;
+      display: block;
+      margin: .25rem 0;
+    }

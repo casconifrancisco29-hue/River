@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estadios del Mundo</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 70px; }
+    .stadium-card { cursor: pointer; transition: transform .12s; }
+    .stadium-card:hover { transform: translateY(-6px); }
+    .stadium-img { height: 160px; object-fit: cover; }
+    .badge-cap { font-size: .85rem; }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand" href="#">Estadios del Mundo</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navCollapse">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navCollapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="#">Inicio</a></li>
+      </ul>
+      <form class="d-flex" role="search" onsubmit="return false;">
+        <input id="searchInput" class="form-control me-2" type="search" placeholder="Buscar estadio, ciudad o equipo" aria-label="Buscar">
+      </form>
+    </div>
+  </div>
+</nav>
+
+<!-- Controls -->
+<div class="container mb-4">
+  <div class="row g-2 align-items-center">
+    <div class="col-md-4">
+      <select id="countryFilter" class="form-select">
+        <option value="">Filtrar por país (todos)</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <select id="sortSelect" class="form-select">
+        <option value="name">Ordenar: Nombre</option>
+        <option value="capacity_desc">Capacidad: mayor a menor</option>
+        <option value="capacity_asc">Capacidad: menor a mayor</option>
+        <option value="year_desc">Año: más nuevo</option>
+        <option value="year_asc">Año: más antiguo</option>
+      </select>
+    </div>
+    <div class="col-md-4 text-end">
+      <button id="resetBtn" class="btn btn-secondary">Resetear filtros</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stadiums grid -->
+<div class="container">
+  <div id="stadiumsRow" class="row g-3">
+    <!-- Tarjetas generadas por JS -->
+  </div>
+
+  <div class="text-center my-4">
+    <small class="text-muted">Página de ejemplo con datos de muestra. Puedes editar el archivo para añadir más estadios.</small>
+  </div>
+</div>
+
+<!-- Modal detalles -->
+<div class="modal fade" id="stadiumModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Estadio</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="carouselImages" class="carousel slide mb-3" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carouselInner"></div>
+          <button class="carousel-control-prev" type="button" data-bs-target="#carouselImages" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#carouselImages" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+          </button>
+        </div>
+
+        <p id="modalInfo"></p>
+        <ul id="modalList" class="list-unstyled"></ul>
+      </div>
+      <div class="modal-footer">
+        <a id="mapLink" class="btn btn-primary" target="_blank">Abrir en mapa</a>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// Datos de ejemplo — reemplázalos o amplíalos como quieras
+const stadiums = [
+  {
+    id: 1,
+    name: "Wembley Stadium",
+    city: "London",
+    country: "Reino Unido",
+    capacity: 90000,
+    year: 2007,
+    team: "England National Team / Eventos",
+    coords: { lat: 51.556, lng: -0.2796 },
+    images: [
+      "https://images.unsplash.com/photo-1517927033932-b4f9f1a01b1a?w=1200&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1508614982396-9129e7b9b1f6?w=1200&auto=format&fit=crop&q=60"
+    ],
+    note: "Estadio icónico en Londres, sede de finales y conciertos."
+  },
+  {
+    id: 2,
+    name: "Camp Nou",
+    city: "Barcelona",
+    country: "España",
+    capacity: 99354,
+    year: 1957,
+    team: "FC Barcelona",
+    coords: { lat: 41.3809, lng: 2.1228 },
+    images: [
+      "https://images.unsplash.com/photo-1542736667-069246bdbc97?w=1200&auto=format&fit=crop&q=60"
+    ],
+    note: "El estadio más grande de Europa (según ciertas mediciones de capacidad)."
+  },
+  {
+    id: 3,
+    name: "Maracanã",
+    city: "Rio de Janeiro",
+    country: "Brasil",
+    capacity: 78838,
+    year: 1950,
+    team: "Selección de Brasil / Clubes locales",
+    coords: { lat: -22.9121, lng: -43.2302 },
+    images: ["https://images.unsplash.com/photo-1533089860892-a7f3e9a1c3da?w=1200&auto=format&fit=crop&q=60"],
+    note: "Famoso por finales y hechos históricos del fútbol."
+  },
+  {
+    id: 4,
+    name: "Allianz Arena",
+    city: "Múnich",
+    country: "Alemania",
+    capacity: 75000,
+    year: 2005,
+    team: "Bayern Múnich",
+    coords: { lat: 48.2188, lng: 11.6247 },
+    images: ["https://images.unsplash.com/photo-1518972559570-9a5a4a4b88c4?w=1200&auto=format&fit=crop&q=60"],
+    note: "Conocido por su fachada iluminada."
+  },
+  {
+    id: 5,
+    name: "Estadio Monumental",
+    city: "Buenos Aires",
+    country: "Argentina",
+    capacity: 70000,
+    year: 1938,
+    team: "River Plate",
+    coords: { lat: -34.545, lng: -58.449 },
+    images: ["https://images.unsplash.com/photo-1521412644187-c49fa049e84d?w=1200&auto=format&fit=crop&q=60"],
+    note: "Principal estadio de River Plate."
+  },
+  {
+    id: 6,
+    name: "MetLife Stadium",
+    city: "East Rutherford",
+    country: "Estados Unidos",
+    capacity: 82500,
+    year: 2010,
+    team: "Eventos / NFL ocasional",
+    coords: { lat: 40.8135, lng: -74.0745 },
+    images: ["https://images.unsplash.com/photo-1505211691830-5d4de9f3e5b5?w=1200&auto=format&fit=crop&q=60"],
+    note: "Estadio multiuso en Nueva Jersey."
+  },
+  {
+    id: 7,
+    name: "Stade de France",
+    city: "Saint-Denis",
+    country: "Francia",
+    capacity: 81338,
+    year: 1998,
+    team: "Selección de Francia / Eventos",
+    coords: { lat: 48.9244, lng: 2.3601 },
+    images: ["https://images.unsplash.com/photo-1521412644187-c49fa049e84d?w=1200&auto=format&fit=crop&q=60"],
+    note: "Construido para la Copa del Mundo 1998."
+  },
+  {
+    id: 8,
+    name: "Azteca",
+    city: "Ciudad de México",
+    country: "México",
+    capacity: 87000,
+    year: 1966,
+    team: "Club América / Selección de México",
+    coords: { lat: 19.3029, lng: -99.1502 },
+    images: ["https://images.unsplash.com/photo-1558980394-0c9f0b87b5b0?w=1200&auto=format&fit=crop&q=60"],
+    note: "Uno de los estadios más emblemáticos de América."
+  }
+];
+
+// Utilidades
+const $ = id => document.getElementById(id);
+
+function populateCountryFilter() {
+  const countries = Array.from(new Set(stadiums.map(s => s.country))).sort();
+  const sel = $('countryFilter');
+  countries.forEach(c => {
+    const o = document.createElement('option'); o.value = c; o.textContent = c; sel.appendChild(o);
+  });
+}
+
+function renderStadiums(list) {
+  const row = $('stadiumsRow'); row.innerHTML = '';
+  if (list.length === 0) {
+    row.innerHTML = '<div class="col-12"><div class="alert alert-warning">No se encontraron estadios con esos filtros.</div></div>';
+    return;
+  }
+  list.forEach(st => {
+    const col = document.createElement('div'); col.className = 'col-12 col-md-6 col-lg-4';
+    const card = document.createElement('div'); card.className = 'card stadium-card h-100 shadow-sm';
+    card.onclick = () => openModal(st.id);
+
+    const img = document.createElement('img'); img.className = 'card-img-top stadium-img'; img.src = st.images[0] || '';
+    img.alt = st.name;
+
+    const body = document.createElement('div'); body.className = 'card-body';
+    body.innerHTML = `
+      <h5 class="card-title mb-1">${st.name}</h5>
+      <p class="card-text mb-1"><small class="text-muted">${st.city} — ${st.country}</small></p>
+      <p class="mb-0"><span class="badge bg-primary badge-cap">Capacidad: ${st.capacity.toLocaleString()}</span> <span class="badge bg-info text-dark">Año: ${st.year}</span></p>
+    `;
+
+    const footer = document.createElement('div'); footer.className = 'card-footer bg-white';
+    footer.innerHTML = `<small class="text-muted">Equipo: ${st.team}</small>`;
+
+    card.appendChild(img); card.appendChild(body); card.appendChild(footer);
+    col.appendChild(card); row.appendChild(col);
+  });
+}
+
+function openModal(id) {
+  const st = stadiums.find(x => x.id === id);
+  if (!st) return;
+  $('modalTitle').textContent = st.name + ' — ' + st.city;
+  $('modalInfo').innerHTML = `<strong>Capacidad:</strong> ${st.capacity.toLocaleString()} &nbsp; <strong>Año:</strong> ${st.year}`;
+  const list = $('modalList'); list.innerHTML = '';
+  const liNote = document.createElement('li'); liNote.textContent = st.note || ''; list.appendChild(liNote);
+  // Carousel images
+  const carouselInner = $('carouselInner'); carouselInner.innerHTML = '';
+  st.images.forEach((img, idx) => {
+    const div = document.createElement('div'); div.className = 'carousel-item' + (idx === 0 ? ' active' : '');
+    const i = document.createElement('img'); i.src = img; i.alt = st.name + ' ' + idx; i.className = 'd-block w-100'; i.style.maxHeight = '420px'; i.style.objectFit = 'cover';
+    div.appendChild(i); carouselInner.appendChild(div);
+  });
+  // Map link (Google Maps)
+  const mapLink = $('mapLink');
+  mapLink.href = `https://www.google.com/maps/search/?api=1&query=${st.coords.lat},${st.coords.lng}`;
+  // Show modal
+  const modal = new bootstrap.Modal(document.getElementById('stadiumModal'));
+  modal.show();
+}
+
+function applyFilters() {
+  const q = $('searchInput').value.trim().toLowerCase();
+  const country = $('countryFilter').value;
+  let list = stadiums.filter(s => {
+    const matchQ = q === '' || [s.name, s.city, s.country, s.team].join(' ').toLowerCase().includes(q);
+    const matchC = country === '' || s.country === country;
+    return matchQ && matchC;
+  });
+  const sort = $('sortSelect').value;
+  if (sort === 'capacity_desc') list.sort((a,b)=> b.capacity - a.capacity);
+  else if (sort === 'capacity_asc') list.sort((a,b)=> a.capacity - b.capacity);
+  else if (sort === 'year_desc') list.sort((a,b)=> b.year - a.year);
+  else if (sort === 'year_asc') list.sort((a,b)=> a.year - b.year);
+  else list.sort((a,b)=> a.name.localeCompare(b.name));
+  renderStadiums(list);
+}
+
+// Listeners
+window.addEventListener('load', () => {
+  populateCountryFilter();
+  renderStadiums(stadiums);
+  $('searchInput').addEventListener('input', applyFilters);
+  $('countryFilter').addEventListener('change', applyFilters);
+  $('sortSelect').addEventListener('change', applyFilters);
+  $('resetBtn').addEventListener('click', () => { $('searchInput').value=''; $('countryFilter').value=''; $('sortSelect').value='name'; applyFilters(); });
+});
+
+</script>
+
+</body>
+</html>
